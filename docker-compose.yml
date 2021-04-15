@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+      args:
+        NGINX_PORT: $NGINX_PORT
+    # volumes:
+    # - public-data:/$WORKDIR/public
+    # - tmp-data:/$WORKDIR/tmp
+    ports:
+      - $NGINX_PORT:80
+    depends_on:
+      - backend
+      - frontend
+  backend:
+    build:
+      context: ./backend
+      args:
+        WORKDIR: $WORKDIR
+        OME_API_ENDPOINT: $OME_API_ENDPOINT
+        ACCESS_TOKEN: $ACCESS_TOKEN
+        REFRESH_TOKEN: $REFRESH_TOKEN
+        EXPIRES_AT: $EXPIRES_AT
+    volumes:
+      - ./backend:/$WORKDIR
+      # - public-data:/$WORKDIR/public
+      # - tmp-data:/$WORKDIR/tmp
+      # - log-data:/$WORKDIR/log
+    # stdin_open: true
+    # tty: true
+    # command: bundle exec puma -C config/puma.rb
+    # environment:
+    #   RAILS_ENV: "production"
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        WORKDIR: $WORKDIR
+        BACKEND_BASE_URL: $BACKEND_BASE_URL
+    volumes:
+      - ./frontend:/$WORKDIR
+      - node_modules:/$WORKDIR/node_modules
+    command: yarn dev
+    # command: yarn start
+    # environment:
+    #   NODE_ENV: "production"
+
+volumes:
+  node_modules:
+  # public-data:
+  # tmp-data:
+  # log-data:
